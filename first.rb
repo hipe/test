@@ -1,6 +1,10 @@
 #!/usr/bin/env ruby
 require 'rubygems'
 require 'ramaze'
+require 'ruby-debug'
+require 'model/init'
+require 'controller/service'
+
 
 class MainController < Ramaze::Controller
   

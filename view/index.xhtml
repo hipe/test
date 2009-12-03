@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+  <head>
+    <title>migraine</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+  </head>
+  <body>
+    <h1>TodoList</h1>
+    <ul>
+      <?r Service.each do |service| ?>
+        <li>#{ h(service.name) }:#{ service.checked },
+        (#{ a('check','check',service.name)})
+        (#{ a('uncheck','uncheck',service.name)})          
+        </li>
+      <?r end ?>
+    </ul>
+    <form method="post" action="#{ route('create') }">
+      <fieldset>
+        <legend>Add a task by entering a title.</legend>
+        <label for="form-name">Service title:</label>
+        <input id="form-name" name="name" type="text" />
+        <input type="submit" value="Create" />
+      </fieldset>
+    </form>    
+  </body>
+</html>
