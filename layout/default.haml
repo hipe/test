@@ -1,0 +1,41 @@
+!!! 5
+%html
+  %head
+    %script(type='text/javascript' src='/js/jquery/current.js')
+    - if @js
+      - @js.each do |js|
+        %script{:type=>'text/javascript', :src=>js}
+    %style{:type=>'text/css'}
+      body { /* thanks http://chneukirchen.org/ */
+      font-family:"Helvetica Neue",Arial,sans-serif;
+      font-size-adjust:none;
+      font-style:normal;
+      font-variant:normal;
+      font-weight:bold;
+      letter-spacing:-0.75pt;
+      /*padding-left: 1em;*/
+      }
+      h1,h2,h3,h4,h5 {color:#999999;      }
+      h1{ font-size:20pt; line-height:22pt;}
+      h2{ font-size:17pt; }
+      h3{ font-size:13pt; }
+      h4{ font-size:11pt; }
+      h5{ font-size:10pt; }       
+      a{text-decoration:none;color: #999;}
+      a:hover{color: #000;}
+      div.svc-med{float:left;padding-left:17px;border:0px solid black;}
+      div.svc-med-tumblr{}
+      div.svc-med-wp{}
+      img.svc-med{position:relative}
+      img.svc-med-tumblr{height:127px;}
+      img.svc-med-wp{height:100px;}      
+      div.clear{clear:both}
+      em.small{font-size: .70em;color:#999}
+      div.stuff1{float:left; border: 0px solid black; padding-left:0.75em;}
+      table.form1 th{text-align:right;}
+      table.form1 td{border: 0px solid black;}
+      table.basic td {padding-left: 0.55em;} 
+    %title 
+      = @title || 'social sync'
+  %body
+    = @content

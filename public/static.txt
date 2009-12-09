@@ -1,0 +1,1 @@
+yes static test

@@ -1,0 +1,58 @@
+%h2
+  %a(href='/')sync
+  your blog sites
+
+%table.basic(style='margin-left: 1em')
+  %tr
+    %td wordpress
+    %td uploaded file 1
+    %td 
+      %a.button-3 remove
+  %tr
+    %td tumblr
+    %td beavis@butthead.com  
+    %td 
+      %a.button-3 remove    
+    
+
+%h3
+  %a(href='\#' id='add-svc')
+    add
+    
+%form(action='/sites/add' method='post')
+  .svc-med-wp(class="svc-med wp" style='display:none')
+    %img(src='/images/svcs/lrg/wp.png' class='svc-med svc-med-wp' alt='wordpress')
+  .svc-med-tumblr(class="svc-med tumblr" style="display:none")
+    %img(src='/images/svcs/lrg/tumblr.jpg' class="svc-med svc-med-tumblr" alt='tumblr')
+  .stuff1(id='svc-cred')
+    %table.form1(class='tumblr' style='display:none')
+      %tr
+        %th
+          tumblr email address
+        %td
+          %input(type='text')
+        %td
+      %tr
+        %th
+          password
+        %td
+          %input(type='text')
+        %td
+          %em.small never saved
+      %tr
+        %td(colspan='2' style='text-align: right')
+          %a.button-3(class='svc-add-cancel')  cancel 
+        %td
+              
+      %table.form1(class='wp' style='display:none')
+        %tr
+          %th
+            wordpress xml dump file
+          %td
+            %input(type='file')
+          %td  
+        %tr
+          %td(colspan='2' style='text-align: right')
+            %a.button-3(class='svc-add-cancel')  cancel 
+          %td
+        
