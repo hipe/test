@@ -27,5 +27,10 @@ jQuery(function(){
       $('.'+all[i]).hide();
     $('#add-svc').show();
   });
+  
+  $('#wp-upload-btn').click(function(){
+    $('#wp-upload-form').submit();
+  });
+
 
 });

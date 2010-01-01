@@ -1,0 +1,13 @@
+div.svc-med{float:left;padding-left:17px;border:0px solid black;}
+div.svc-med-tumblr{}
+div.svc-med-wp{}
+img.svc-med{position:relative}
+img.svc-med-tumblr{height:127px;}
+img.svc-med-wp{height:100px;}      
+div.clear{clear:both}
+em.small{font-size: .70em;color:#999}
+div.stuff1{float:left; border: 0px solid black; padding-left:0.75em;}
+table.form1 th{text-align:right;}
+table.form1 td{border: 0px solid black;}
+table.basic td {padding-left: 0.55em;}
+#wp-upload-btn{margin-left: 12px;}
