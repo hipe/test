@@ -5,9 +5,18 @@ jQuery(function(){
     for(i=0; i<all.length; i++)
       $('.'+all[i]).hide();
     $('.svc-med').show();
+    $('#cancel-add-svc').show();
+    $('#add-svc').hide();
+  });
+  
+  $('#cancel-add-svc').click(function(){
+    $('#add-svc').show();
+    $('#cancel-add-svc').hide();
+    $('.svc-med').hide();    
   });
 
   $('img.svc-med').click(function(e){
+    $('#cancel-add-svc').hide();    
     $('#add-svc').hide();
     ee = e;
     kls = $(this).attr('class');
@@ -32,5 +41,8 @@ jQuery(function(){
     $('#wp-upload-form').submit();
   });
 
+  $('#tumblr-submit').click(function(){
+    $('#tumblr-submit-hack').click();
+  });
 
 });

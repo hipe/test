@@ -12,13 +12,28 @@
     %title 
       = @title || 'social sync'
   %body
-    - if flash_message = session.delete(:msg)
-      %h3 success
-      %p
-        %em =flash_message
-    - if error_message = session.delete(:err)
-      .error
-        %h3.error sorry, uh error occured
-        %p.error 
-          =h error_message
-    = @content
+    .default-wrapper
+      - if @zones
+        %ul.zones-with-pipes
+          - @zones.keys.each_with_index do |key, idx|
+            - zone = @zones[key]
+            %li
+              %a{:href=>zone.url}
+                = zone.label
+                - unless idx == @zones.size - 1
+                  %span.separator
+                    |
+        .clear
+      - if flash_message = session.delete(:msg)
+        %h3 success
+        %div.screen-like
+          %div.backend-response
+            :preserve
+              #{flash_message}
+      - if error_message = session.delete(:err)
+        %h3.error sorry, an error occured:      
+        %div.screen-like.error
+          %div.backend-response.error
+            :preserve
+              #{error_message}
+      = @content

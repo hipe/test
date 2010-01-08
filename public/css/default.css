@@ -7,6 +7,7 @@ font-weight:bold;
 letter-spacing:-0.75pt;
 /*padding-left: 1em;*/
 }
+div.default-wrapper{ margin: 0.87em 0.6em }
 h1,h2,h3,h4,h5 {color:#999999;      }
 h1{ font-size:20pt; line-height:22pt;}
 h2{ font-size:17pt; }
@@ -15,3 +16,47 @@ h4{ font-size:11pt; }
 h5{ font-size:10pt; }       
 a{text-decoration:none;color: #999;}
 a:hover{color: #000;}
+div.clear {clear:both;}
+
+div.screen-like{
+  background-color:#ccc;  
+  width: 50em;  
+  padding: 1em;
+  white-space: normal
+}
+div.backend-response{ 
+  font-family:Andale Mono,monospace;
+  font-size:0.85em;
+  /*white-space:pre;  we want it to wrap longer lines*/
+}
+
+.button-3{margin: 0 0 0 0.23em; color: #999}
+
+table.basic th{color: #999; padding: 0 0.40em 0 0;}
+table.basic .separator {margin: 0 0 0 0.40em; color: #000;}
+
+ul.zones-with-pipes{ list-style: none; padding: 0; margin: 0; }
+ul.zones-with-pipes li a{
+  float: left;    
+  padding:0.1em 0.23em 0.25em 0;
+  margin: 0 0.15em;   
+}
+ul.zones-with-pipes li span.separator{ padding: 0 0 0 0.23em; color: #000;}
+
+ul.zones-as-buttons{ list-style: none; padding: 0; margin: 0; }
+ul.zones-as-buttons li a{
+  color: #eee;
+  float: left;    
+  background-color: #999; 
+  -moz-border-radius:8px;
+  -webkit-border-radius:8px;
+  -opera-border-radius:8px;
+  -khtml-border-radius:8px;
+  border-radius:9px;
+  padding:0.1em 0.82em 0.25em 0.82em;
+  margin: 0 0.15em;   
+}
+ul.zones-as-buttons li a:hover{ color: #fff; background-color: #777; }
+ul.zones-as-buttons li span.separator{ display: none;}
+
+
