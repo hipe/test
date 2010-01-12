@@ -6,62 +6,63 @@
 -#   %tr
 -#     %td wordpress
 -#     %td uploaded file 1
--#     %td 
+-#     %td
 -#       %a.button-3 remove
 -#   %tr
 -#     %td tumblr
--#     %td beavis@butthead.com  
--#     %td 
--#       %a.button-3 remove    
+-#     %td beavis@butthead.com
+-#     %td
+-#       %a.button-3 remove
 
 
 
-%form(method="post" enctype="multipart/form-data" action='/accounts/edit' id='items-edit-form')         
+%form(method="post" enctype="multipart/form-data" action='/accounts/edit' id='items-edit-form')
   %input(type="hidden" name='command_name' class='hidden-command'  value='not yet set')
-  %input(type="hidden" name='object-id' class='hidden-object-id' value='not yet set')  
-  - @table.field[:id].hide
-  %table.basic.smaller(style='margin-left: 1em')
-    - if @table.show_header.nil? || @table.show_header
-      %tr
-        - visible_fields = @table.visible_fields
-        - last_idx = visible_fields.size - 1
-        - visible_fields.each_with_index do |field, idx|
+  %input(type="hidden" name='object-id' class='hidden-object-id' value='not yet set')
+  - if @table
+    - @table.field[:id].hide if @table
+    %table.basic.smaller(style='margin-left: 1em')
+      - if @table.show_header.nil? || @table.show_header
+        %tr
+          - visible_fields = @table.visible_fields
+          - last_idx = visible_fields.size - 1
+          - visible_fields.each_with_index do |field, idx|
+            %th
+              &= field.label
+              - if idx != last_idx
+                %span.separator
+                  |
           %th
-            &= field.label
-            - if idx != last_idx
-              %span.separator
-                |
-        %th
-      
-    - @table.list.each do |acct|
-      %tr
-        - @table.visible_fields.each do |field|
-          %td 
-            &= field.renderer.call(acct)
-        %td
-          - if acct.items.size > 0
-            %a{:href=>"/items/index?a=#{acct.id}", :class=>%{button-3}}
-              #{acct.items.size} items
-          - else
-            %span.button-3
-              0 items
-          %a{:href=>"#", :class=>%{button-3 click-hack action-delete object-id-#{acct.id}} }
-            remove
-            
+
+      - @table.list.each do |acct|
+        %tr
+          - @table.visible_fields.each do |field|
+            %td
+              &= field.renderer.call(acct)
+          %td
+            - if acct.items.size > 0
+              %a{:href=>"/items/index?a=#{acct.id}", :class=>%{button-3}}
+                #{acct.items.size} items
+            - else
+              %span.button-3
+                0 items
+            %a{:href=>"#", :class=>%{button-3 click-hack action-delete object-id-#{acct.id}} }
+              remove
+
 
 %h3
   %a(href='\#' id='add-svc')
     add
   %a(href='\#' id='cancel-add-svc' style='display:none')
     cancel
-    
+
 
 .svc-med-wp(class="svc-med wp" style='display:none')
   %img(src='/images/svcs/lrg/wp.png' class='svc-med svc-med-wp' alt='wordpress')
 .svc-med-tumblr(class="svc-med tumblr" style="display:none")
   %img(src='/images/svcs/lrg/tumblr.jpg' class="svc-med svc-med-tumblr" alt='tumblr')
 .stuff1(id='svc-cred')
-  %form(method="post" action='/accounts/add' id='add-tumblr-form')         
+  %form(method="post" action='/accounts/add' id='add-tumblr-form')
     %table.form1(class='tumblr' style='display:none')
       %tr
         %th
@@ -75,19 +76,19 @@
         %td
           %input(type='text')
         %td
-          %em.small 
+          %em.small
             never saved
             %a(href='\#' style='vertical-align: super')
-              (?)        
+              (?)
       %tr
         %td(colspan='2' style='text-align: right')
-          %a.button-3(class='svc-add-cancel')  cancel 
+          %a.button-3(class='svc-add-cancel')  cancel
           %a.button-3(id='tumblr-submit')  submit
           %input(type="submit" value='submit' name='submit' id='tumblr-submit-hack')
           %input(type="hidden" name='service_name' value='tumblr')
-          %input(type="hidden" name='command_name' value='accounts:add')          
+          %input(type="hidden" name='command_name' value='accounts:add')
         %td
-  %form(method="post" enctype="multipart/form-data" action='/uploads/wp' id='wp-upload-form')         
+  %form(method="post" enctype="multipart/form-data" action='/uploads/wp' id='wp-upload-form')
     %table.form1(class='wp' style='display:none')
       %tr
         %th
@@ -97,12 +98,11 @@
               (?)
         %td
           %input(type='file' name='file')
-        %td  
-      %tr
-        %td(colspan='2' style='text-align: right')  
-          %input(type="submit" value='submit' name='submit')
-          %a.button-3(id='wp-upload-btn' href='\#') upload
-          &nbsp;&nbsp;&nbsp;
-          %a.button-3(class='svc-add-cancel')  cancel 
         %td
-        
+      %tr
+        %td(colspan='2' style='text-align: right')
+          %input(type="submit" value='submit' name='submit' id='awful-hack' style='display: none')
+          %a{:class => 'button-3', :id=>'awful-hack-accomplice', :href=>'#'} upload
+          &nbsp;&nbsp;&nbsp;
+          %a.button-3(class='svc-add-cancel')  cancel
+        %td

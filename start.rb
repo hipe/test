@@ -4,6 +4,7 @@ require 'ramaze'
 require 'ruby-debug'
 require 'hipe-socialsync'
 require 'hipe-core/loquacious/all'
+require 'hipe-core/lingual/ascii-typesetting'
 require 'hipe-cli/rack-land'
 require 'orderedhash'
 
@@ -21,6 +22,93 @@ Ramaze.options.dsl do
 end
 
 class CommonException < RuntimeError; end
+
+Zones = OrderedHash.new
+class << Zones
+  alias_method :ohash_store, :store
+  def store key, value
+    raise CommonException.new("won't clobber #{key}") if has_key? key
+    ohash_store key, value
+  end
+end
+
+module CommonController
+  def self.included klass
+    klass.extend CommonControllerClassMethods
+  end
+  def escape_flash_string str
+    result = h(str).gsub!("\n", "<br/>\n").gsub!(' ','&nbsp;')  # no strip -- leading w/s can be meaningful
+    result
+  end
+  def set_error_flash str
+    session[:err] = escape_flash_string(str)
+  end
+  def set_flash_from_response response
+    session[response.valid? ? :msg : :err] = escape_flash_string(response.to_s)
+  end
+  def set_flash mixed
+    if mixed.respond_to?(:valid?)
+      set_flash_from_response mixed
+    else
+      session[:msg] = mixed.to_s
+    end
+  end
+  def err(str,extra)
+    set_error_flash(str)
+    redirect_referrer
+  end
+  def common_setup
+    @zones = Zones
+  end
+  def user
+    current_user_email
+  end
+  def current_user_email
+    'anonymous@sosy'
+  end
+
+  # turns {"10"=>"foo","11"=>"foo","12"=>"foo"} into {"foo"=>"10,11,12"}
+  def checkbox_flip(request_hash, element_name)
+    arr = []
+    request_hash.select{|k,v| v==element_name}.each do |pair|
+      arr << pair[0]
+      request_hash.delete(pair[0])
+    end
+    request_hash[element_name] = arr*','
+  end
+
+  def string_prepend prepend, str
+    str.replace %{#{prepend}#{str}}
+  end
+
+  def rackize opts
+    params = request.params
+    if params['command_name']
+      string_prepend(opts[:plugin], params['command_name']) if opts[:plugin]
+    else
+      params['command_name'] = request.env['PATH_INFO'].scan(%r|/([^/]+)|).map{|x| x[0]}.join(':')
+    end
+    checkbox_flip params, opts[:cb] if opts[:cb]
+    opts[:rename].each do |k,v|
+      params[v] = params.delete(k)
+    end if opts[:rename]
+    params
+  end
+end
+
+module CommonControllerClassMethods
+  def self.extended klass
+    super
+    klass.instance_eval do
+      layout :default
+      engine :Haml
+    end
+  end
+  def register_zone *args
+    zone = Zone.construct(*args)
+    Zones[zone.name] = zone
+  end
+end
 
 class Zone
   # experimental top nav generation
@@ -46,59 +134,6 @@ class Zone
     @label || @name
   end
 
-end
-
-Zones = OrderedHash.new
-class << Zones
-  alias_method :ohash_store, :store
-  def store key, value
-    raise CommonException.new("won't clobber #{key}") if has_key? key
-    ohash_store key, value
-  end
-end
-
-module CommonController
-  def self.included klass
-    klass.extend CommonControllerClassMethods
-  end
-  def escape_flash_string str
-    result = h(str.strip)
-    result.gsub!("\n", "<br/>\n")
-    result
-  end
-  def set_error_flash str
-    session[:err] = escape_flash_string(str)
-  end
-  def set_flash_from_response response
-    session[response.valid? ? :msg : :err] = escape_flash_string(response.to_s)
-  end
-  def err(str,extra)
-    set_error_flash(str)
-    redirect_referrer
-  end
-  def common_setup
-    @zones = Zones
-  end
-  def user
-    current_user_email
-  end
-  def current_user_email
-    'anonymous@sosy'
-  end
-end
-
-module CommonControllerClassMethods
-  def self.extended klass
-    super
-    klass.instance_eval do
-      layout :default
-      engine :Haml
-    end
-  end
-  def register_zone *args
-    zone = Zone.construct(*args)
-    Zones[zone.name] = zone
-  end
 end
 
 class MainController < Ramaze::Controller
@@ -129,16 +164,14 @@ class AccountsController < Ramaze::Controller
   end
 
   def add
-    response = App.run(request.params, user)
-    set_flash_from_response(response)
+    set_flash App.run(request.params, user)
     redirect_referrer
   end
 
   def edit
     my_request = request.params.dup
     my_request["command_name"] = "accounts:"+my_request["command_name"]
-    response = App.run(my_request, user)
-    set_flash_from_response(response)
+    set_flash App.run(my_request, user)
     redirect_referrer
   end
 end
@@ -159,16 +192,35 @@ class UploadsController < Ramaze::Controller
       'service_credential_name' => File.basename(new_path),
       'auto-create-account'     => ""
     }
-    response = App.run(my_request,user)
-    set_flash_from_response(response)
+    set_flash App.run(my_request,user)
     redirect_referrer
   end
 end
 
+module CommonView
+  include Hipe::AsciiTypesetting::Methods # truncate
+
+  #
+  # @param [Hash] options :checkboxes => :yes
+  def render_table(table, opts={})
+    @_table = table;
+    @_table_opts = opts;
+    @_table_fields = @_table.visible_fields
+    rs = Ramaze::View::Haml.call action, Innate::View.read(File.expand_path('../../partials/table.haml', action.view))
+    rs[0]
+  end
+
+  def render_testo
+    @i_am_data_set_in_the_partial_controller = "D.S.I.T.P.C"
+    Ramaze::View::Haml.call action, Innate::View.read(File.expand_path('../../partials/tpartial.haml', action.view));
+  end
+
+end
 
 # @x = request.params.pretty_inspect  TempFile.size  File.extname
 class ItemsController < Ramaze::Controller
   include CommonController
+  include CommonView
   map '/items'
   register_zone :items, :index => 301, :label =>'your blogs'
 
@@ -180,16 +232,41 @@ class ItemsController < Ramaze::Controller
     if result.valid? and result.data.tables
       prepare_table(result.data)
     else
-      set_flash_from_response(result)
+      set_flash result
     end
+    @accounts = App.run({'command_name'=>'accounts:list'}, user).data.accounts
     @js = ['/js/page/common.js','/js/page/items.js']
     @css = ['/css/page/items.css']
   end
 
+  def testo
+    @some_data_set_in_the_actual_controller = 'S.D.S.I.T.A.C'
+  end
+
+
+  def edit
+    set_flash App.run(rackize(:cb=>'item_ids',:plugin=>'items:'), user)
+    redirect_referrer
+  end
+
+  def view
+    common_setup
+    result = App.run(rackize(:rename=>{"o"=>"id"}), user)
+    @tables = result.data.tables
+    @tables["items"].field[:excerpt].renderer = lambda{|x| truncate(x.content, 90) }
+    @tables["items"].field[:title].renderer = lambda{|x| truncate(x.title, 90) }
+    @js = [
+      '/js/page/common.js',
+      '/histeria/js/jquery/latest/ui/ui.core.js',
+      '/histeria/js/resizable-table.js',
+      '/js/page/items.js'
+    ]
+  end
+
   def prepare_table(data)
     @table = data.tables[0]
-    @table.field[:account].renderer = lambda{|x| x.truncate(x.account.one_word,10) }
-    @table.field[:title].renderer = lambda{|x| x.truncate(x.title,30) }
+    @table.field[:account].renderer = lambda{|x| truncate(x.account.one_word,10) }
+    @table.field[:title].renderer = lambda{|x| truncate(x.title,30) }
     title_elements = []
     if data.account
       title_elements << "account #{data.account.one_word.inspect}"
@@ -208,6 +285,11 @@ class ItemsController < Ramaze::Controller
     @left = @inners.shift
     @right = @inners.pop
   end
+
+  include CommonView
+
+
+
 end
 
 #

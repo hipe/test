@@ -8,15 +8,15 @@ jQuery(function(){
     $('#cancel-add-svc').show();
     $('#add-svc').hide();
   });
-  
+
   $('#cancel-add-svc').click(function(){
     $('#add-svc').show();
     $('#cancel-add-svc').hide();
-    $('.svc-med').hide();    
+    $('.svc-med').hide();
   });
 
   $('img.svc-med').click(function(e){
-    $('#cancel-add-svc').hide();    
+    $('#cancel-add-svc').hide();
     $('#add-svc').hide();
     ee = e;
     kls = $(this).attr('class');
@@ -30,19 +30,19 @@ jQuery(function(){
     }
     $('.'+which).show();
   });
-  
+
   $('.svc-add-cancel').click(function(){
     for(i=0;i<all.length;i++)
       $('.'+all[i]).hide();
     $('#add-svc').show();
   });
-  
-  $('#wp-upload-btn').click(function(){
-    $('#wp-upload-form').submit();
-  });
 
   $('#tumblr-submit').click(function(){
     $('#tumblr-submit-hack').click();
+  });
+
+  $('#awful-hack-accomplice').click(function(){
+    $('#awful-hack').trigger('click');
   });
 
 });

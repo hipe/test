@@ -1,49 +1,49 @@
-%form(method="post" enctype="multipart/form-data" action='/items/edit' id='items-edit-form')         
+%form(method="post" enctype="multipart/form-data" action='/items/edit' id='items-edit-form')
   %input(type="hidden" name='command_name' class='hidden-command'  value='not yet set')
-  %input(type="hidden" name='item-id' class='hidden-item-id' value='not yet set')  
   %h2=@table_title
-  %table.basic.items.smaller(style='margin-left: 0.7em' )
-    - if @table.show_header.nil? || @table.show_header
-      %tr
-        %th.cb
-          %input(type="checkbox" class='cb-all-hack cb-buttons-hack' group='default')
-        - last_idx = @fields.size - 1
-        - @fields.each_with_index do |field, idx|
+  - if @table
+    %table.basic.items.smaller(style='margin-left: 0.7em' )
+      - if @table.show_header.nil? || @table.show_header
+        %tr
+          %th.cb
+            %input(type="checkbox" class='cb-all-hack cb-buttons-hack' group='default')
+          - last_idx = @fields.size - 1
+          - @fields.each_with_index do |field, idx|
+            %th
+              &= field.label
+              - if idx != last_idx
+                %span.separator
+                  |
           %th
-            &= field.label
-            - if idx != last_idx
-              %span.separator
-                |
-        %th
-      - @table.list.each do |item|
-        %tr.wp.glow-hack(group='default')
-          %td.cb
-            %input{:type=>"checkbox", :group=>"default", :value=>item.id, :class=>'cb-buttons-hack'}
-          %td.wp-cold.left
-            &= @left.renderer.call(item)
-          - @inners.each do |field|
-            %td.wp-cold
-              &= field.renderer.call(item)
-          %td.wp-cold.right
-            &= @right.renderer.call(item)
-          %td.buttons
-            %a{:href=>"/items/item?o=#{item.id}", :class=>%{button-3}}
-              details
-            %a{:href=>"#", :class=>%{button-3 click-hack action-delete object-id-#{item.id}} }
-              remove
-      %tr
-        %td{:colspan=>@inners.size + 3, :class=>'aggregates-default bottom-buttons'}      
-          %em.note
-            with <span id='num-selected-default'></span> selected:&nbsp;
-          %a(class="button-3 target-button" id="target-button-default") target...
-          %a(class="button-3 hack-click") remove!
-          .clear
-          %div{:id => 'target-default', :style => 'display: none'}
+        - @table.list.each do |item|
+          %tr.wp.glow-hack(group='default')
+            %td.cb
+              %input{:type=>"checkbox", :group=>"default", :name=>%{#{item.id}}, :value=>"item_ids", :class=>'cb-buttons-hack'}
+            %td.wp-cold.left
+              &= @left.renderer.call(item)
+            - @inners.each do |field|
+              %td.wp-cold
+                &= field.renderer.call(item)
+            %td.wp-cold.right
+              &= @right.renderer.call(item)
+            %td.buttons
+              %a{:href=>"/items/view?o=#{item.id}", :class=>%{button-3}}
+                details
+              %a{:href=>"#", :class=>%{button-3 click-hack action-delete object-id-#{item.id}} }
+                remove
+        %tr
+          %td{:colspan=>@inners.size + 3, :class=>'aggregates-default bottom-buttons', :style=>'display: none'}
             %em.note
-              target account:
-            %select{:name=>'account'}
-              %option{:value=>'beefis'} Beefer
-              %option{:value=>'boofis'}        Boofer      
-            %a{:class=>"button-3 submit-target click-hack action-add-target"} submit!
-            %a{:class=>"button-3 cancel-target", :id=>"cancel-target-default"} cancel
-            
+              with <span id='num-selected-default'></span> selected:&nbsp;
+            %a(class="button-3 target-button" id="target-button-default") target...
+            %a(class="button-3 click-hack action-delete") remove!
+            .clear
+            %div{:id => 'target-default', :style => 'display: none'}
+              %em.note
+                target account:
+              %select{:name=>'account'}
+                - @accounts.each do |account|
+                  %option{:value=>account.id}
+                    #{account.one_word}
+              %a{:class=>"button-3 submit-target click-hack action-add_target_account"} submit
+              %a{:class=>"button-3 cancel-target", :id=>"cancel-target-default"} cancel

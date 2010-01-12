@@ -1,0 +1,5 @@
+- if ! @tables || @tables.size == 0
+  (no tables)
+- if @tables
+  - @tables.each do |table_pair|
+    #{ render_table(table_pair[1], :checkboxes => :yes) }

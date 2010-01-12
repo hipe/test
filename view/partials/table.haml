@@ -1,0 +1,64 @@
+- if ! @_table
+  (no table)
+-else
+  - if @_table.label != false
+    %h2 #{@_table.label}
+
+  - if @_table.axis == :horizontal
+    %table{ :class => 'generic-horizontal' }
+      - @_table.visible_fields.each do |field|
+        %tr
+          %th
+            .out
+              .in #{field.label}
+          - @_table.list.each do |item|
+            %td.cdgrag
+            %td
+              .out
+                .in
+                  &= field.renderer.call(item).to_s
+
+  - else
+    %table{:class => 'generic-vertical smaller resizable '+@_table.name}
+      - if @_table.show_header.nil? || @table.show_header
+        %tr
+          - if @_table_opts[:checkboxes]
+            %th.cb
+              .out
+                .in
+                  %input(type="checkbox" class='cb-all-hack cb-buttons-hack' group='default')
+          - @_table_fields.each_with_index do |field, idx|
+            %th
+              .out
+                .in
+                  #{ field.label  }
+            - if idx != @_table_fields.size - 1
+              %th.cdrag
+                %div &nbsp
+
+      - @_table.list.each do |item|
+        %tr{ :class => 'glow-hack' }
+          - if @_table_opts[:checkboxes]
+            %td.cb
+              .out
+                .in
+                  %input{:type=>"checkbox", :group=>"default", :name=>%{#{item.id}}, :value=>"item_ids", :class=>'cb-buttons-hack'}
+          - if @_table_fields.size > 0
+            %td.cold.left
+              .out
+                .in
+                  &= @_table_fields[0].renderer.call(item)
+          - (1..@_table_fields.size-2).each do |idx|
+            %td.cdrag.cold
+              .cdrag-div
+            %td.cold
+              .out
+                .in
+                  &= @_table_fields[idx].renderer.call(item)
+          - if @_table_fields.size > 1
+            %td.cdrag.cold
+              .cdrag-div
+            %td.cold.right
+              .out
+                .in
+                  &= @_table_fields.last.renderer.call(item)
