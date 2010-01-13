@@ -1,0 +1,8 @@
+- @_buttons.each do |button_pair|
+  - button = button_pair[1]
+  - if button.href
+    %a{:class => 'button-3', :href=>button.href }
+      #{ button.label }
+  - else
+    %a{:class => %{button-3 click-hack action-#{button.name} object-id-#{button.object_id}}}
+      #{ button.label }

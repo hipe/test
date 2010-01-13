@@ -110,6 +110,115 @@ module CommonControllerClassMethods
   end
 end
 
+
+module RenderTable; end
+module RenderButtons; end
+
+module CommonView
+  include Hipe::AsciiTypesetting::Methods # truncate
+  include RenderTable, RenderButtons
+
+  def render_testo
+    @i_am_data_set_in_the_partial_controller = "D.S.I.T.P.C"
+    Ramaze::View::Haml.call action, Innate::View.read(File.expand_path('../../partials/tpartial.haml', action.view));
+  end
+
+  def humanize_lite str
+    str.to_s.gsub '_', ' '
+  end
+
+end
+
+
+# **************** experimental partials ************
+
+module RenderTable
+
+  Defaults = {
+    :top_separator_html => '<div class="separator">  | </div>',
+    :separator_html     => '',
+    :resize => [:cdrag],
+    :checkboxes => false,
+  }
+
+  def render_table(table, opts={})
+    @_table = table;
+    opts = Defaults.merge(opts);
+    @_table_cdrag = opts[:resize].include? :cdrag
+    @_table_wdrag = opts[:resize].include? :wdrag
+    @_table_sdrag = opts[:resize].include? :sdrag
+    @_table_edrag = opts[:resize].include? :edrag
+    fields = table.visible_fields
+    opts[:row_coda] = :buttons if !opts.has_key?(:row_coda)
+    opts.delete(:row_coda) unless table.has_visible_field?(opts[:row_coda])
+    if table.has_visible_field?(:buttons) && !opts.has_key?(:no_escape)
+      opts[:no_escape] = [:buttons]
+    else
+      opts[:no_escape] ||= []
+    end
+    @_table_all_visible_fields = fields.dup
+    @_table_raw = Hash[*opts[:no_escape].map{|x| [x,true]}.flatten]
+    @_table_none = false
+    @_table_solo = nil
+    @_table_left = nil
+    @_table_rite = nil
+    @_table_codas = opts[:row_coda] ? fields.slice!(fields.index{|x| x.name==opts[:row_coda]},fields.length) : []
+    case fields.length
+      when 0 then @_table_none = true
+      when 1 then @_table_solo = fields.pop
+      else
+        @_table_left = fields.shift
+        @_table_rite = fields.pop
+    end
+    @_table_inner = fields # empty ok
+    @_table_fields = @_table.visible_fields
+    @_table_opts = opts
+    rs = Ramaze::View::Haml.call action, Innate::View.read(File.expand_path('../../partials/table.haml', action.view))
+    rs[0]
+  end
+
+end
+
+module Buttons
+  class Button
+    include CommonView; # humanize_lite
+    include Hipe::Loquacious::OpenSetter
+    extend Hipe::Loquacious::AttrAccessor
+    symbol_accessor :name
+    string_accessors :action, :href, :label
+    integer_accessor :object_id
+    def initialize name, opts={}
+      opts[:name] = name
+      open_set opts
+    end
+    def label; @label || humanize_lite(@name) end
+  end
+  def self.make &block
+    @buttons = OrderedHash.new
+    instance_eval(&block)
+    @buttons
+  end
+  def self.button(*args)
+    button = Button.new(*args)
+    @buttons[button.name] = button
+    button
+  end
+end
+
+module RenderButtons
+  def render_buttons buttons
+    @_buttons = buttons
+    @_buttons_opts = {}
+    rs = Ramaze::View::Haml.call action, Innate::View.read(File.expand_path('../../partials/buttons.haml', action.view))
+    rs[0]
+  end
+end
+
+# *************** end experimental partials ***************
+
+
+
+
 class Zone
   # experimental top nav generation
 
@@ -197,43 +306,6 @@ class UploadsController < Ramaze::Controller
   end
 end
 
-module RenderTable
-
-  RenderTableDefaults = {
-    :top_separator_html => '<div class="separator">  | </div>',
-    :separator_html     => '',
-    :resize => [:cdrag]
-  }
-
-  # @param [Hash] options :checkboxes => :yes, :resize=>[:cdrag,:edrag,:wdrag,:sdrag]
-  def render_table(table, opts={})
-    @_table = table;
-    opts = RenderTableDefaults.merge(opts);
-    drag_opts = {
-      :cdrag => opts[:resize].include?(:cdrag),
-      :wdrag => opts[:resize].include?(:wdrag),
-      :edrag => opts[:resize].include?(:edrag),
-      :sdrag => opts[:resize].include?(:sdrag)
-    }
-    opts.merge! drag_opts
-    @_table_opts = opts
-    @_table_fields = @_table.visible_fields
-    rs = Ramaze::View::Haml.call action, Innate::View.read(File.expand_path('../../partials/table.haml', action.view))
-    rs[0]
-  end
-
-end
-
-module CommonView
-  include Hipe::AsciiTypesetting::Methods # truncate
-  include RenderTable
-
-  def render_testo
-    @i_am_data_set_in_the_partial_controller = "D.S.I.T.P.C"
-    Ramaze::View::Haml.call action, Innate::View.read(File.expand_path('../../partials/tpartial.haml', action.view));
-  end
-
-end
 
 # @x = request.params.pretty_inspect  TempFile.size  File.extname
 class ItemsController < Ramaze::Controller
@@ -257,11 +329,6 @@ class ItemsController < Ramaze::Controller
     @css = ['/css/page/items.css']
   end
 
-  def testo
-    @some_data_set_in_the_actual_controller = 'S.D.S.I.T.A.C'
-  end
-
-
   def edit
     set_flash App.run(rackize(:cb=>'item_ids',:plugin=>'items:'), user)
     redirect_referrer
@@ -269,16 +336,23 @@ class ItemsController < Ramaze::Controller
 
   def view
     common_setup
-    result = App.run(rackize(:rename=>{"o"=>"id"}), user)
-    @tables = result.data.tables
-    @tables["items"].field[:excerpt].renderer = lambda{|x| truncate(x.content, 90) }
-    @tables["items"].field[:title].renderer = lambda{|x| truncate(x.title, 90) }
     @js = [
       '/js/page/common.js',
       '/histeria/js/jquery/latest/ui/ui.core.js',
       '/histeria/js/resizable-table.js',
       '/js/page/items.js'
     ]
+    result = App.run(rackize(:rename=>{"o"=>"id"}), user)
+    @tables = result.data.tables
+    @tables["items"].field[:excerpt].renderer = lambda{|x| truncate(x.content, 90) }
+    @tables["items"].field[:title].renderer = lambda{|x| truncate(x.title, 90) }
+    @tables["events"].field(:buttons, :show_header=>false) do |event|
+      bs = Buttons.make do
+        button :one_thing, :object_id => event.id
+        button :do_this, :href => "/go/here"
+      end
+      render_buttons(bs)
+    end
   end
 
   def prepare_table(data)
@@ -305,10 +379,53 @@ class ItemsController < Ramaze::Controller
   end
 
   include CommonView
-
-
-
 end
+
+
+
+class TestController < Ramaze::Controller
+  include CommonController
+  include CommonView
+  map '/_test'
+  register_zone :_test, :index => 999, :label =>'test'
+
+  def index
+    common_setup
+    if (name = request.params["name"])
+    else
+      @tests = self.class.instance_methods(false).grep(/^[^_]/).sort;
+      @tests.reject!{|x| ['index','run'].include? x}
+    end
+    @js = ['/js/page/common.js']
+  end
+
+  def partial
+    @some_data_set_in_the_actual_controller = 'S.D.S.I.T.A.C'
+  end
+
+  def buttons
+    common_setup
+    @js = ['/js/page/common.js']
+    @buttons = Buttons.make do
+      button(:action1, :label=>'button for going back to tests', :href=>"/_test/index")
+      button(:another_action, :label=>'a click hack',:object_id=>1)
+    end
+  end
+
+  def run
+    name = request.params.keys.first
+    if respond_to? name
+      redirect route(%{/#{name}})
+    else
+      set_error_flash %{invalid test #{name.inspect}}
+      redirect_referrer
+    end
+  end
+end
+
+
+
+
 
 #
 #class Services < Ramaze::Controller

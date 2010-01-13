@@ -1,76 +1,126 @@
-- if ! @_table
+-if ! @_table
   (no table)
+-elsif @_table_none
+  (no visible columns)
 -else
-  - if @_table.label != false
-    %h2 #{@_table.label}
+  -if @_table.label != false
+    %h2.generic.table.generic-table #{@_table.label}
 
-  - if @_table.axis == :horizontal
+  -if @_table.axis == :horizontal
     %table{ :class => 'generic-horizontal' }
-      - @_table.visible_fields.each do |field|
+      -@_table.visible_fields.each do |field|
         %tr
           %th
             .out
               .in #{field.label}
-          - @_table.list.each do |item|
+          -@_table.list.each do |item|
             %td.wedrag.cdgrag
             %td
               .out
                 .in
                   &= field.renderer.call(item).to_s
 
-  - else
+
+
+
+
+
+  -else
     %table{:class => 'generic-vertical smaller resizable '+@_table.name}
-      - if @_table.show_header.nil? || @table.show_header
+      -if @_table.show_header.nil? || @table.show_header
         %tr
-          - if @_table_opts[:checkboxes]
-            %th.cb
+          -if @_table_opts[:checkboxes]
+            %td.cb.fixed-width
               .out
                 .in
                   %input(type="checkbox" class='cb-all-hack cb-buttons-hack' group='default')
-          - if @_table_opts[:wdrag]
+          -if @_table_wdrag
             %th.wedrag.wdrag
               = @_table_opts[:top_separator_html]
-          - @_table_fields.each_with_index do |field, idx|
+          -@_table_all_visible_fields.each_with_index do |header, idx|
             %th
               .out
                 .in
-                  #{ field.label  }
-            - if idx != @_table_fields.size - 1
+                  #{ header.show_header? ? header.label : ''  }
+            -if idx != @_table_all_visible_fields.size - 1
               %th.wedrag.cdrag
                 = @_table_opts[:top_separator_html]
-          - if @_table_opts[:edrag]
-            %th.wedrag.edrag
-              = @_table_opts[:top_separator_html]
+          -if @_table_edrag
+            -if @_table_codas.length > 0
+              %th.wedrag.edrag
+            -else
+              %th.wedrag.edrag
+                = @_table_opts[:top_separator_html]
 
-      - @_table.list.each do |item|
+
+
+
+
+
+
+
+
+      -@_table.list.each do |item|
         %tr{ :class => 'glow-hack' }
-          - if @_table_opts[:checkboxes]
-            %td.cb
+          -if @_table_opts[:checkboxes]
+            %td.cb.fixed-width
               .out
                 .in
                   %input{:type=>"checkbox", :group=>"default", :name=>%{#{item.id}}, :value=>"item_ids", :class=>'cb-buttons-hack'}
-          - if @_table_opts[:wdrag]
+          -if @_table_wdrag
             %td.wedrag.wdrag
               = @_table_opts[:separator_html]
-          - if @_table_fields.size > 0
+          -if @_table_solo
+            %td.cold.solo
+              .out
+                .in
+                  -if @_table_raw[@_table_solo.name]
+                    =@_table_solo.renderer.call item
+                  -else
+                    &=@_table_solo.renderer.call item
+          -else
             %td.cold.left
               .out
                 .in
-                  &= @_table_fields[0].renderer.call(item)
-          - (1..@_table_fields.size-2).each do |idx|
-            %td.wedrag.cdrag.cold
-              .cdrag-div
-            %td.cold
-              .out
-                .in
-                  &= @_table_fields[idx].renderer.call(item)
-          - if @_table_fields.size > 1
-            %td.wedrag.cdrag.cold
-              .cdrag-div
+                  -if @_table_raw[@_table_left.name]
+                    =@_table_left.renderer.call item
+                  -else
+                    &=@_table_left.renderer.call item
+            -@_table_inner.each_with_index do |field, idx|
+              -if @_table_cdrag
+                %td.wedrag.cdrag.cold
+                  .cdrag-div
+              %td.cold
+                .out
+                  .in
+                    -if @_table_raw[field.name]
+                      =field.renderer.call item
+                    -else
+                      &=field.renderer.call item
+            -if @_table_cdrag
+              %td.wedrag.cdrag.cold
+                .cdrag-div
             %td.cold.right
               .out
                 .in
-                  &= @_table_fields.last.renderer.call(item)
-          - if @_table_opts[:edrag]
-            %td.wedrag.edrag
-              = @_table_opts[:separator_html]
+                  -if @_table_raw[@_table_rite.name]
+                    =@_table_rite.renderer.call item
+                  -else
+                    &=@_table_rite.renderer.call item
+            -@_table_codas.each_with_index do |field, idx|
+              -if @_table_cdrag
+                %td.wedrag.cdrag
+                  .cdrag-div
+              %td.coda
+                .out
+                  .in
+                    -if @_table_raw[field.name]
+                      =field.renderer.call item
+                    -else
+                      &=field.renderer.call item
+            -if @_table_edrag
+              -if @_table_codas.length > 0
+                %td{:class => 'wedrag edrag'}
+              -else
+                %td{:class => 'wedrag edrag'}
+                  .cdrag-div

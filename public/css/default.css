@@ -18,6 +18,8 @@ a{text-decoration:none;color: #999;}
 a:hover{color: #000;}
 div.clear {clear:both;}
 
+h2.generic{margin: 1.2em 0 0.5em 1em;}
+
 div.screen-like{
   background-color:#ccc;
   width: 50em;
@@ -38,11 +40,12 @@ table.basic .separator {margin: 0 0 0 0.40em; color: #000;}
 
 table.generic-horizontal th{color: #999; padding: 0 0.40em 0 0; text-align: right;}
 
-
 table.generic-vertical{
   border-width: 0;
   border-collapse: separate;
   border-spacing: 0 0.23em;
+  position: relative;
+  left: 1em;
 }
 table.generic-vertical td.cold{
   background-color: #ccc;
@@ -83,17 +86,21 @@ table.generic-vertical .out{
 }
 table.generic-vertical th div.in{
   float: right;
-  padding: 0 0.4em 0 0;
+  padding: 0 0.4em 0 0.2em;
   /*margin-left: auto;
   margin-right: auto;*/
   /* width is set by resizable_table */
 }
 table.generic-vertical td div.in{
- padding: 0 0.5em 0 0;
+ padding: 0 0.5em 0 0.2em;
 }
 table.smaller tr{
   font-size: 0.9em;
   font-weight: normal;
+}
+table.smaller .button-3 {
+  font-size: 1em;
+  font-weight: bold;
 }
 table.smaller th{
   font-size: 1em;
