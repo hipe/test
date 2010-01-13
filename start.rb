@@ -197,18 +197,36 @@ class UploadsController < Ramaze::Controller
   end
 end
 
-module CommonView
-  include Hipe::AsciiTypesetting::Methods # truncate
+module RenderTable
 
-  #
-  # @param [Hash] options :checkboxes => :yes
+  RenderTableDefaults = {
+    :top_separator_html => '<div class="separator">  | </div>',
+    :separator_html     => '',
+    :resize => [:cdrag]
+  }
+
+  # @param [Hash] options :checkboxes => :yes, :resize=>[:cdrag,:edrag,:wdrag,:sdrag]
   def render_table(table, opts={})
     @_table = table;
-    @_table_opts = opts;
+    opts = RenderTableDefaults.merge(opts);
+    drag_opts = {
+      :cdrag => opts[:resize].include?(:cdrag),
+      :wdrag => opts[:resize].include?(:wdrag),
+      :edrag => opts[:resize].include?(:edrag),
+      :sdrag => opts[:resize].include?(:sdrag)
+    }
+    opts.merge! drag_opts
+    @_table_opts = opts
     @_table_fields = @_table.visible_fields
     rs = Ramaze::View::Haml.call action, Innate::View.read(File.expand_path('../../partials/table.haml', action.view))
     rs[0]
   end
+
+end
+
+module CommonView
+  include Hipe::AsciiTypesetting::Methods # truncate
+  include RenderTable
 
   def render_testo
     @i_am_data_set_in_the_partial_controller = "D.S.I.T.P.C"

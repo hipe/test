@@ -75,17 +75,22 @@ table.generic-vertical td.cb{
   background-color: #fff;
   text-align: left;
 }
-table.generic-vertical th.cdrag div{
-  background: black;
-  width: 3px;
+table.generic-vertical th.wedrag div.separator {
+  color: black;
 }
 table.generic-vertical .out{
   overflow: hidden;
 }
-table.generic-vertical .in{
-  float: left;
+table.generic-vertical th div.in{
+  float: right;
+  padding: 0 0.4em 0 0;
+  /*margin-left: auto;
+  margin-right: auto;*/
+  /* width is set by resizable_table */
 }
-/*
+table.generic-vertical td div.in{
+ padding: 0 0.5em 0 0;
+}
 table.smaller tr{
   font-size: 0.9em;
   font-weight: normal;
@@ -103,9 +108,10 @@ table.smaller th.cb{
 table.smaller td.cb{
   padding: 0 0.23em 0 0;
   background-color: #fff;
-}*/
+}
 
 table .edrag{cursor: e-resize;  }
+table .wdrag{cursor: w-resize;  }
 table .cdrag{ cursor: col-resize;}
 
 
